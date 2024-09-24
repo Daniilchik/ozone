@@ -609,7 +609,8 @@ public final class StorageContainerManager extends ServiceRuntimeInfoImpl
    * @param conf        HDDS configuration
    * @param configurator SCM configurator
    * @return SCM instance
-   * @throws IOException, AuthenticationException
+   * @throws IOException on Failure,
+   * @throws AuthenticationException
    */
   public static StorageContainerManager createSCM(
       OzoneConfiguration conf, SCMConfigurator configurator)
@@ -622,7 +623,8 @@ public final class StorageContainerManager extends ServiceRuntimeInfoImpl
    *
    * @param conf        HDDS configuration
    * @return SCM instance
-   * @throws IOException, AuthenticationException
+   * @throws IOException on Failure,
+   * @throws AuthenticationException
    */
   public static StorageContainerManager createSCM(OzoneConfiguration conf)
       throws IOException, AuthenticationException {
@@ -640,10 +642,10 @@ public final class StorageContainerManager extends ServiceRuntimeInfoImpl
    *  Replication Manager
    *  Safe Mode Manager
    *
-   * @param conf - Ozone Configuration.
-   * @param configurator - A customizer which allows different managers to be
+   * @param conf Ozone Configuration.
+   * @param configurator A customizer which allows different managers to be
    *                    used if needed.
-   * @throws IOException - on Failure.
+   * @throws IOException  on Failure.
    */
   @SuppressWarnings("methodLength")
   private void initializeSystemManagers(OzoneConfiguration conf,
@@ -862,9 +864,9 @@ public final class StorageContainerManager extends ServiceRuntimeInfoImpl
    * default CA. This function initializes those values based on the
    * configurator.
    *
-   * @param conf - Config
-   * @param configurator - configurator
-   * @throws IOException - on Failure
+   * @param conf Config
+   * @param configurator configurator
+   * @throws IOException on Failure
    */
   private void initializeCAnSecurityProtocol(OzoneConfiguration conf,
       SCMConfigurator configurator) throws IOException {

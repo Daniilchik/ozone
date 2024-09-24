@@ -78,9 +78,10 @@ public class VolumeUsage {
 
   /**
    * Calculate available space use method B.
+   * <pre>
    * |----used----|   (avail)   |++++++++reserved++++++++|
    *              |     fsAvail      |-------other-------|
-   *                          -&gt;|~~~~|&lt;-
+   *                          ->|~~~~|<-</pre>
    *                      remainingReserved
    * B) avail = fsAvail - Max(reserved - other, 0);
    */
