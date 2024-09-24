@@ -81,7 +81,7 @@ public class VolumeUsage {
    * <pre>
    * |----used----|   (avail)   |++++++++reserved++++++++|
    *              |     fsAvail      |-------other-------|
-   *                          ->|~~~~|<-</pre>
+   *                          ->|~~~~|<- </pre>
    *                      remainingReserved
    * B) avail = fsAvail - Max(reserved - other, 0);
    */
