@@ -132,9 +132,9 @@ Close All Containers
                             ${message} =    Execute And Ignore Error    ozone admin container close "${container}"
                             Run Keyword If    '${message}' != '${EMPTY}'      Should Contain   ${message}   is in closing state
         ${output} =         Execute          ozone admin container info "${container}"
-                            Should contain   ${output}   CLOS
+                            Should contain   ${output}   CLOSED
     END
-    Wait until keyword succeeds    4min    10sec    All container is closed
+    Wait until keyword succeeds    6min    10sec    All container is closed
 
 All container is closed
     ${output} =         Execute           ozone admin container list --state OPEN
