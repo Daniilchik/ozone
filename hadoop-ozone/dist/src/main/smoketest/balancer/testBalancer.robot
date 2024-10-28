@@ -66,7 +66,7 @@ Run Container Balancer
                             Should Contain                  ${result}             Container Balancer started successfully.
 
 Wait Finish Of Balancing
-    ${result} =             Execute                         ozone admin containerbalancer status
+    ${result} =             Execute                         ozone admin containerbalancer status -v --history
                             Should Contain                  ${result}             ContainerBalancer is Running.
                             Wait Until Keyword Succeeds      4min    10sec    ContainerBalancer is Not Running
                             Sleep                   60000ms
@@ -86,11 +86,11 @@ Verify Balancer Iteration
     Should Contain    ${output}    Scheduled to move containers                       ${containers}
 
 Run Balancer Status
-    ${result} =      Execute                         ozone admin containerbalancer status
+    ${result} =      Execute                         ozone admin containerbalancer status -v
                      Should Contain                  ${result}             ContainerBalancer is Running.
 
 Run Balancer Verbose Status
-    ${result} =      Execute                         ozone admin containerbalancer status -v
+    ${result} =      Execute                         ozone admin containerbalancer status -v --history
                      Verify Verbose Balancer Status    ${result}
                      Verify Balancer Iteration    ${result}    1    IN_PROGRESS    3
                      Should Contain                  ${result}             Current iteration info:
