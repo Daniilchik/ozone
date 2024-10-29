@@ -114,6 +114,12 @@ Create Multiple Keys
             LOG             ${fileName}
             Create Key    ${key}    ${file}    --replication=${REPLICATION} --type=${TYPE}
             Key Should Match Local File    ${key}      ${file}
+
+            ${container} =      Execute          ozone admin container list --state OPEN | jq -r 'select(.replicationConfig.data == 3) | .containerID' | head -1
+            ${message} =        Execute And Ignore Error    ozone admin container close "${container}"
+            Run Keyword If      '${message}' != '${EMPTY}'      Should Contain   ${message}   is in closing state
+            ${output} =         Execute          ozone admin container info "${container}"
+                                Should contain   ${output}   CLOS
     END
 
 Datanode Usageinfo
@@ -124,17 +130,6 @@ Datanode Usageinfo
 Get Uuid
     ${result} =             Execute          ozone admin datanode list | awk -v RS= '{$1=$1}1'| grep ${HOST} | sed -e 's/Datanode: //'|sed -e 's/ .*$//'
     [return]          ${result}
-
-Close All Containers
-    FOR     ${INDEX}    IN RANGE    15
-        ${container} =      Execute          ozone admin container list --state OPEN | jq -r 'select(.replicationConfig.data == 3) | .containerID' | head -1
-        EXIT FOR LOOP IF    "${container}" == "${EMPTY}"
-                            ${message} =    Execute And Ignore Error    ozone admin container close "${container}"
-                            Run Keyword If    '${message}' != '${EMPTY}'      Should Contain   ${message}   is in closing state
-        ${output} =         Execute          ozone admin container info "${container}"
-                            Should contain   ${output}   CLOSED
-    END
-    Wait until keyword succeeds    10min    10sec    All container is closed
 
 All container is closed
     ${output} =         Execute           ozone admin container list --state OPEN
@@ -156,8 +151,6 @@ Verify Container Balancer for RATIS/EC containers
     Datanode Usageinfo          ${uuid}
 
     Create Multiple Keys          ${KEYS}
-
-    Close All Containers
 
     ${datanodeOzoneUsedBytesInfo} =    Get Datanode Ozone Used Bytes Info          ${uuid}
     Should Be True    ${datanodeOzoneUsedBytesInfo} < ${SIZE}
