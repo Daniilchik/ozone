@@ -21,7 +21,7 @@ Library             Collections
 Resource            ../commonlib.robot
 Resource            ../ozone-lib/shell.robot
 
-Test Timeout        22 minutes
+Test Timeout        20 minutes
 
 *** Variables ***
 ${SECURITY_ENABLED}                 false
@@ -135,7 +135,7 @@ Close All Containers
                             Should contain   ${output}   CLOS
     END
     Wait until keyword succeeds    4min    10sec    All container is closed
-    Sleep                   500000ms
+    Sleep                   600000ms
 All container is closed
     ${output} =         Execute           ozone admin container list --state OPEN
                         Should Be Empty   ${output}
