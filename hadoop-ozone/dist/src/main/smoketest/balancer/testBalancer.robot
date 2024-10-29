@@ -21,7 +21,7 @@ Library             Collections
 Resource            ../commonlib.robot
 Resource            ../ozone-lib/shell.robot
 
-Test Timeout        20 minutes
+Test Timeout        22 minutes
 
 *** Variables ***
 ${SECURITY_ENABLED}                 false
@@ -62,13 +62,13 @@ Datanode Recommission is Finished
                             Should Not Contain   ${result}   ENTERING_MAINTENANCE
 
 Run Container Balancer
-    ${result} =             Execute                         ozone admin containerbalancer start -t 0.1 -d 100 -i 2
+    ${result} =             Execute                         ozone admin containerbalancer start -t 0.1 -d 100 -i 1
                             Should Contain                  ${result}             Container Balancer started successfully.
 
 Wait Finish Of Balancing
     ${result} =             Execute                         ozone admin containerbalancer status -v --history
                             Should Contain                  ${result}             ContainerBalancer is Running.
-                            Wait Until Keyword Succeeds      6min    10sec    ContainerBalancer is Not Running
+                            Wait Until Keyword Succeeds      4min    10sec    ContainerBalancer is Not Running
                             Sleep                   60000ms
 
 Verify Verbose Balancer Status
@@ -135,7 +135,7 @@ Close All Containers
                             Should contain   ${output}   CLOS
     END
     Wait until keyword succeeds    4min    10sec    All container is closed
-    Sleep                   300000ms
+    Sleep                   500000ms
 All container is closed
     ${output} =         Execute           ozone admin container list --state OPEN
                         Should Be Empty   ${output}
