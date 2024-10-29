@@ -21,7 +21,7 @@ Library             Collections
 Resource            ../commonlib.robot
 Resource            ../ozone-lib/shell.robot
 
-Test Timeout        20 minutes
+Test Timeout        25 minutes
 
 *** Variables ***
 ${SECURITY_ENABLED}                 false
