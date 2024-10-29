@@ -112,7 +112,7 @@ Create Multiple Keys
             ${fileName} =           Set Variable            file-${INDEX}.txt
             ${key} =    Set Variable    /${VOLUME}/${BUCKET}/${fileName}
             LOG             ${fileName}
-            Create Key    ${key}    ${file}
+            Create Key    ${key}    ${file}    --replication=${REPLICATION} --type=${TYPE}
             Key Should Match Local File    ${key}      ${file}
     END
 
