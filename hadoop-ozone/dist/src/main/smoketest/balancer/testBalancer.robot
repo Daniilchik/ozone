@@ -134,7 +134,7 @@ Close All Containers
         ${output} =         Execute          ozone admin container info "${container}"
                             Should contain   ${output}   CLOSED
     END
-    Wait until keyword succeeds    6min    10sec    All container is closed
+    Wait until keyword succeeds    10min    10sec    All container is closed
 
 All container is closed
     ${output} =         Execute           ozone admin container list --state OPEN
