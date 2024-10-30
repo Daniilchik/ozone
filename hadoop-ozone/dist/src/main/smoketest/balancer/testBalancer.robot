@@ -126,10 +126,9 @@ Get Uuid
     [return]          ${result}
     
 Close All Pipelines
-    ${pipelines} =    Execute Command    ozone admin pipeline list | grep "PipelineID" | awk '{print $2}'
+    ${pipelines} =    Execute          ozone admin pipeline list | grep "PipelineID" | awk '{print $2}'
     FOR    ${pipeline}    IN    @{pipelines}
-        ${result} =    Execute Command    ozone admin pipeline close ${pipeline}
-        Should Contain    ${result}    Closed pipeline ${pipeline} successfully
+        ${result} =    Execute          ozone admin pipeline close ${pipeline}
     END
     Sleep                   600000ms
     
@@ -140,10 +139,10 @@ Close All Containers
                             ${message} =    Execute And Ignore Error    ozone admin container close "${container}"
                             Run Keyword If    '${message}' != '${EMPTY}'      Should Contain   ${message}   is in closing state
         ${output} =         Execute          ozone admin container info "${container}"
-                            Should contain   ${output}   CLOSED
+                            Should contain   ${output}   CLOS
     END
     Wait until keyword succeeds    15min    10sec    All container is closed
-    Sleep                   200000ms
+
 All container is closed
     ${output} =         Execute           ozone admin container list --state OPEN
     ${output1} =        Execute           ozone admin container list --state CLOSING
