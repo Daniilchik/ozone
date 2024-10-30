@@ -62,13 +62,13 @@ Datanode Recommission is Finished
                             Should Not Contain   ${result}   ENTERING_MAINTENANCE
 
 Run Container Balancer
-    ${result} =             Execute                         ozone admin containerbalancer start -t 0.1 -d 100 -i 1
+    ${result} =             Execute                         ozone admin containerbalancer start -t 0.1 -d 200 -i 2
                             Should Contain                  ${result}             Container Balancer started successfully.
 
 Wait Finish Of Balancing
     ${result} =             Execute                         ozone admin containerbalancer status -v --history
                             Should Contain                  ${result}             ContainerBalancer is Running.
-                            Wait Until Keyword Succeeds      4min    10sec    ContainerBalancer is Not Running
+                            Wait Until Keyword Succeeds      6min    10sec    ContainerBalancer is Not Running
                             Sleep                   60000ms
 
 Verify Verbose Balancer Status
