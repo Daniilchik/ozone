@@ -21,7 +21,7 @@ Library             Collections
 Resource            ../commonlib.robot
 Resource            ../ozone-lib/shell.robot
 
-Test Timeout        25 minutes
+Test Timeout        30 minutes
 
 *** Variables ***
 ${SECURITY_ENABLED}                 false
@@ -132,13 +132,15 @@ Close All Containers
                             ${message} =    Execute And Ignore Error    ozone admin container close "${container}"
                             Run Keyword If    '${message}' != '${EMPTY}'      Should Contain   ${message}   is in closing state
         ${output} =         Execute          ozone admin container info "${container}"
-                            Should contain   ${output}   CLOS
+                            Should contain   ${output}   CLOSED
     END
-    Wait until keyword succeeds    5min    10sec    All container is closed
-    Sleep                   300000ms
+    Wait until keyword succeeds    15min    10sec    All container is closed
+    Sleep                   200000ms
 All container is closed
     ${output} =         Execute           ozone admin container list --state OPEN
+    ${output1} =        Execute           ozone admin container list --state CLOSING
                         Should Be Empty   ${output}
+                        Should Be Empty   ${output1}
 
 Get Datanode Ozone Used Bytes Info
     [arguments]             ${uuid}
