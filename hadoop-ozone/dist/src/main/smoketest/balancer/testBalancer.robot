@@ -126,10 +126,7 @@ Get Uuid
     [return]          ${result}
     
 Close All Pipelines
-    ${pipelines} =    Execute          ozone admin pipeline list | grep "PipelineID" | awk '{print $2}'
-    FOR    ${pipeline}    IN    ${pipelines}
-        ${result} =    Execute          ozone admin pipeline close ${pipeline}
-    END
+    ${result} =    Execute          ozone admin pipeline close --all
     Sleep                   600000ms
     
 Close All Containers
