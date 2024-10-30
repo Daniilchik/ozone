@@ -124,7 +124,15 @@ Datanode Usageinfo
 Get Uuid
     ${result} =             Execute          ozone admin datanode list | awk -v RS= '{$1=$1}1'| grep ${HOST} | sed -e 's/Datanode: //'|sed -e 's/ .*$//'
     [return]          ${result}
-
+    
+Close All Pipelines
+    ${pipelines} =    Execute Command    ozone admin pipeline list | grep "PipelineID" | awk '{print $2}'
+    FOR    ${pipeline}    IN    @{pipelines}
+        ${result} =    Execute Command    ozone admin pipeline close ${pipeline}
+        Should Contain    ${result}    Closed pipeline ${pipeline} successfully
+    END
+    Sleep                   600000ms
+    
 Close All Containers
     FOR     ${INDEX}    IN RANGE    15
         ${container} =      Execute          ozone admin container list --state OPEN | jq -r '.containerID' | head -1
@@ -158,6 +166,8 @@ Verify Container Balancer for RATIS/EC containers
     Datanode Usageinfo          ${uuid}
 
     Create Multiple Keys          ${KEYS}
+
+    Close All Pipelines
 
     Close All Containers
 
