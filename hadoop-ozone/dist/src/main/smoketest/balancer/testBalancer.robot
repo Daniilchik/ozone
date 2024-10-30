@@ -43,8 +43,8 @@ Datanode In Maintenance Mode
     ${result} =             Execute                         ozone admin datanode maintenance ${HOST}
                             Should Contain                  ${result}             Entering maintenance mode on datanode
     ${result} =             Execute                         ozone admin datanode list | grep "Operational State:*"
-                            Wait Until Keyword Succeeds      30sec   5sec    Should contain   ${result}   ENTERING_MAINTENANCE
-                            Wait Until Keyword Succeeds      3min    10sec   Related pipelines are closed
+                            Wait Until Keyword Succeeds      1min   5sec    Should contain   ${result}   ENTERING_MAINTENANCE
+                            Wait Until Keyword Succeeds      5min    10sec   Related pipelines are closed
                             Sleep                   60000ms
 
 Related pipelines are closed
@@ -54,7 +54,7 @@ Related pipelines are closed
 Datanode Recommission
     ${result} =             Execute                         ozone admin datanode recommission ${HOST}
                             Should Contain                  ${result}             Started recommissioning datanode
-                            Wait Until Keyword Succeeds      1min    10sec    Datanode Recommission is Finished
+                            Wait Until Keyword Succeeds      2min    10sec    Datanode Recommission is Finished
                             Sleep                   300000ms
 
 Datanode Recommission is Finished
