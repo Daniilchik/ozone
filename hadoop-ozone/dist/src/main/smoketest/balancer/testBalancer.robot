@@ -68,7 +68,7 @@ Run Container Balancer
 Wait Finish Of Balancing
     ${result} =             Execute                         ozone admin containerbalancer status -v --history
                             Should Contain                  ${result}             ContainerBalancer is Running.
-                            Wait Until Keyword Succeeds      6min    10sec    ContainerBalancer is Not Running
+                            Wait Until Keyword Succeeds      4min    10sec    ContainerBalancer is Not Running
                             Sleep                   60000ms
 
 Verify Verbose Balancer Status
@@ -86,11 +86,11 @@ Verify Balancer Iteration
     Should Contain    ${output}    Scheduled to move containers                       ${containers}
 
 Run Balancer Status
-    ${result} =      Execute                         ozone admin containerbalancer status -v
+    ${result} =      Execute                         ozone admin containerbalancer status
                      Should Contain                  ${result}             ContainerBalancer is Running.
 
 Run Balancer Verbose Status
-    ${result} =      Execute                         ozone admin containerbalancer status -v --history
+    ${result} =      Execute                         ozone admin containerbalancer status -v
                      Verify Verbose Balancer Status    ${result}
                      Verify Balancer Iteration    ${result}    1    IN_PROGRESS    3
                      Should Contain                  ${result}             Current iteration info:
@@ -125,26 +125,21 @@ Get Uuid
     ${result} =             Execute          ozone admin datanode list | awk -v RS= '{$1=$1}1'| grep ${HOST} | sed -e 's/Datanode: //'|sed -e 's/ .*$//'
     [return]          ${result}
     
-Close All Pipelines
-    ${result} =    Execute          ozone admin pipeline close --all
-    Sleep                   600000ms
-    
 Close All Containers
     FOR     ${INDEX}    IN RANGE    15
-        ${container} =      Execute          ozone admin container list --state OPEN | jq -r '.containerID' | head -1
+        ${container} =      Execute          ozone admin container list --state OPEN | jq -r 'select(.replicationConfig.data == 3) | .containerID' | head -1
         EXIT FOR LOOP IF    "${container}" == "${EMPTY}"
                             ${message} =    Execute And Ignore Error    ozone admin container close "${container}"
                             Run Keyword If    '${message}' != '${EMPTY}'      Should Contain   ${message}   is in closing state
         ${output} =         Execute          ozone admin container info "${container}"
                             Should contain   ${output}   CLOS
     END
-    Wait until keyword succeeds    15min    10sec    All container is closed
+    Wait until keyword succeeds    4min    10sec    All container is closed
 
 All container is closed
     ${output} =         Execute           ozone admin container list --state OPEN
-    ${output1} =        Execute           ozone admin container list --state CLOSING
                         Should Be Empty   ${output}
-                        Should Be Empty   ${output1}
+
 
 Get Datanode Ozone Used Bytes Info
     [arguments]             ${uuid}
@@ -161,7 +156,7 @@ Verify Container Balancer for RATIS/EC containers
     ${uuid} =                   Get Uuid
     Datanode Usageinfo          ${uuid}
 
-    Create Multiple Keys          ${KEYS}
+    Create Multiple Keys          3
 
     Close All Pipelines
 
@@ -185,7 +180,7 @@ Verify Container Balancer for RATIS/EC containers
     ${datanodeOzoneUsedBytesInfoAfterContainerBalancing} =    Get Datanode Ozone Used Bytes Info          ${uuid}
     Should Not Be Equal As Integers     ${datanodeOzoneUsedBytesInfo}    ${datanodeOzoneUsedBytesInfoAfterContainerBalancing}
     #We need to ensure that after balancing, the amount of data recorded on each datanode falls within the following ranges:
-    #{SIZE}*3 < used < {SIZE}*3.5 for RATIS containers, and {SIZE}*1.5 < used < {SIZE}*2.5 for EC containers.
+    #{SIZE}*3 < used < {SIZE}*3.5 for RATIS containers, and {SIZE}*0.5 < used < {SIZE}*1.5 for EC containers.
     Should Be True    ${datanodeOzoneUsedBytesInfoAfterContainerBalancing} < ${SIZE} * ${UPPER_LIMIT}
     Should Be True    ${datanodeOzoneUsedBytesInfoAfterContainerBalancing} > ${SIZE} * ${LOWER_LIMIT}
 

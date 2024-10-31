@@ -28,4 +28,4 @@ export OZONE_REPLICATION_FACTOR=3
 source "$COMPOSE_DIR/../testlib.sh"
 
 start_docker_env
-execute_robot_test ${OM} -v REPLICATION:rs-3-2-1024k -v TYPE:EC -v KEYS:5 -v LOWER_LIMIT:0.9 -v UPPER_LIMIT:1.9 -N ozone-balancer-EC balancer/testBalancer.robot
+execute_robot_test ${OM} -v REPLICATION:rs-3-2-1024k -v TYPE:EC -v LOWER_LIMIT:0.9 -v UPPER_LIMIT:1.9 -N ozone-balancer-EC balancer/testBalancer.robot
