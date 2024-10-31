@@ -21,7 +21,7 @@ Library             Collections
 Resource            ../commonlib.robot
 Resource            ../ozone-lib/shell.robot
 
-Test Timeout        30 minutes
+Test Timeout        35 minutes
 
 *** Variables ***
 ${SECURITY_ENABLED}                 false
@@ -43,8 +43,8 @@ Datanode In Maintenance Mode
     ${result} =             Execute                         ozone admin datanode maintenance ${HOST}
                             Should Contain                  ${result}             Entering maintenance mode on datanode
     ${result} =             Execute                         ozone admin datanode list | grep "Operational State:*"
-                            Wait Until Keyword Succeeds      1min   5sec    Should contain   ${result}   ENTERING_MAINTENANCE
-                            Wait Until Keyword Succeeds      5min    10sec   Related pipelines are closed
+                            Wait Until Keyword Succeeds      30sec   5sec    Should contain   ${result}   ENTERING_MAINTENANCE
+                            Wait Until Keyword Succeeds      3min    10sec   Related pipelines are closed
                             Sleep                   60000ms
 
 Related pipelines are closed
@@ -54,7 +54,7 @@ Related pipelines are closed
 Datanode Recommission
     ${result} =             Execute                         ozone admin datanode recommission ${HOST}
                             Should Contain                  ${result}             Started recommissioning datanode
-                            Wait Until Keyword Succeeds      2min    10sec    Datanode Recommission is Finished
+                            Wait Until Keyword Succeeds      1min    10sec    Datanode Recommission is Finished
                             Sleep                   300000ms
 
 Datanode Recommission is Finished
@@ -66,9 +66,10 @@ Run Container Balancer
                             Should Contain                  ${result}             Container Balancer started successfully.
 
 Wait Finish Of Balancing
-    ${result} =             Execute                         ozone admin containerbalancer status -v --history
+    ${result} =             Execute                         ozone admin containerbalancer status
                             Should Contain                  ${result}             ContainerBalancer is Running.
                             Wait Until Keyword Succeeds      4min    10sec    ContainerBalancer is Not Running
+
                             Sleep                   60000ms
 
 Verify Verbose Balancer Status
@@ -124,7 +125,7 @@ Datanode Usageinfo
 Get Uuid
     ${result} =             Execute          ozone admin datanode list | awk -v RS= '{$1=$1}1'| grep ${HOST} | sed -e 's/Datanode: //'|sed -e 's/ .*$//'
     [return]          ${result}
-    
+
 Close All Containers
     FOR     ${INDEX}    IN RANGE    15
         ${container} =      Execute          ozone admin container list --state OPEN | jq -r 'select(.replicationConfig.data == 3) | .containerID' | head -1
@@ -135,11 +136,11 @@ Close All Containers
                             Should contain   ${output}   CLOS
     END
     Wait until keyword succeeds    4min    10sec    All container is closed
+    Sleep          900000ms
 
 All container is closed
     ${output} =         Execute           ozone admin container list --state OPEN
                         Should Be Empty   ${output}
-
 
 Get Datanode Ozone Used Bytes Info
     [arguments]             ${uuid}
@@ -156,7 +157,7 @@ Verify Container Balancer for RATIS/EC containers
     ${uuid} =                   Get Uuid
     Datanode Usageinfo          ${uuid}
 
-    Create Multiple Keys          3
+    Create Multiple Keys          ${KEYS}
 
     Close All Containers
 
@@ -178,7 +179,7 @@ Verify Container Balancer for RATIS/EC containers
     ${datanodeOzoneUsedBytesInfoAfterContainerBalancing} =    Get Datanode Ozone Used Bytes Info          ${uuid}
     Should Not Be Equal As Integers     ${datanodeOzoneUsedBytesInfo}    ${datanodeOzoneUsedBytesInfoAfterContainerBalancing}
     #We need to ensure that after balancing, the amount of data recorded on each datanode falls within the following ranges:
-    #{SIZE}*3 < used < {SIZE}*3.5 for RATIS containers, and {SIZE}*0.5 < used < {SIZE}*1.5 for EC containers.
+    #{SIZE}*3 < used < {SIZE}*3.5 for RATIS containers, and {SIZE}*1.5 < used < {SIZE}*2.5 for EC containers.
     Should Be True    ${datanodeOzoneUsedBytesInfoAfterContainerBalancing} < ${SIZE} * ${UPPER_LIMIT}
     Should Be True    ${datanodeOzoneUsedBytesInfoAfterContainerBalancing} > ${SIZE} * ${LOWER_LIMIT}
 
