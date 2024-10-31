@@ -158,8 +158,6 @@ Verify Container Balancer for RATIS/EC containers
 
     Create Multiple Keys          3
 
-    Close All Pipelines
-
     Close All Containers
 
     ${datanodeOzoneUsedBytesInfo} =    Get Datanode Ozone Used Bytes Info          ${uuid}
