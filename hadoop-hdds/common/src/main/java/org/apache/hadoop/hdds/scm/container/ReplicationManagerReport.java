@@ -129,12 +129,16 @@ public class ReplicationManagerReport {
   }
 
   public void incrementAndSample(HealthState stat, ContainerID container) {
-    incrementAndSample(stat.toString(), container);
+    incrementAndSampleInstant(stat.toString(), container, SAMPLE_LIMIT);
+  }
+
+  public void incrementAndSampleInstant(HealthState stat, ContainerID container, int samples) {
+    incrementAndSampleInstant(stat.toString(), container, samples);
   }
 
   public void incrementAndSample(HddsProtos.LifeCycleState stat,
       ContainerID container) {
-    incrementAndSample(stat.toString(), container);
+    incrementAndSampleInstant(stat.toString(), container, SAMPLE_LIMIT);
   }
 
   public void setComplete() {
@@ -271,12 +275,12 @@ public class ReplicationManagerReport {
     return adder;
   }
 
-  private void incrementAndSample(String stat, ContainerID container) {
+  private void incrementAndSampleInstant(String stat, ContainerID container, int samples) {
     increment(stat);
     List<ContainerID> list = containerSample
         .computeIfAbsent(stat, k -> new ArrayList<>());
     synchronized (list) {
-      if (list.size() < SAMPLE_LIMIT) {
+      if (list.size() < samples) {
         list.add(container);
       }
     }

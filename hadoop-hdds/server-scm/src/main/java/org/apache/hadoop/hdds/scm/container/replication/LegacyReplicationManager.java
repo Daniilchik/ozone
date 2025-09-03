@@ -71,6 +71,7 @@ import org.apache.ratis.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.time.Clock;
@@ -352,7 +353,7 @@ public class LegacyReplicationManager {
    */
   @SuppressWarnings("checkstyle:methodlength")
   protected void processContainer(ContainerInfo container,
-      ReplicationManagerReport report) {
+      ReplicationManagerReport report, @Nullable Integer count) {
     final ContainerID id = container.containerID();
     try {
       // synchronize on the containerInfo object to solve container
@@ -369,8 +370,12 @@ public class LegacyReplicationManager {
          */
         if (state == LifeCycleState.OPEN) {
           if (!isOpenContainerHealthy(container, replicas)) {
-            report.incrementAndSample(
-                HealthState.OPEN_UNHEALTHY, container.containerID());
+            if (count == null) {
+              report.incrementAndSample(
+                      HealthState.OPEN_UNHEALTHY, container.containerID());
+            } else {
+              report.incrementAndSampleInstant(HealthState.OPEN_UNHEALTHY, container.containerID(), count);
+            }
             eventPublisher.fireEvent(SCMEvents.CLOSE_CONTAINER, id);
           }
           return;
@@ -429,8 +434,13 @@ public class LegacyReplicationManager {
             forceCloseContainer(container, replicas);
             return;
           } else {
-            report.incrementAndSample(HealthState.QUASI_CLOSED_STUCK,
-                container.containerID());
+            if (count == null) {
+              report.incrementAndSample(HealthState.QUASI_CLOSED_STUCK,
+                      container.containerID());
+            } else {
+              report.incrementAndSampleInstant(HealthState.QUASI_CLOSED_STUCK,
+                      container.containerID(), count);
+            }
           }
         }
 
@@ -491,8 +501,12 @@ public class LegacyReplicationManager {
          * exact number of replicas in the same state.
          */
         if (isContainerEmpty(container, replicas)) {
+          if (count == null) {
           report.incrementAndSample(
               HealthState.EMPTY, container.containerID());
+          } else {
+            report.incrementAndSampleInstant(HealthState.EMPTY, container.containerID(), count);
+          }
           /*
            *  If container is empty, schedule task to delete the container.
            */
@@ -512,7 +526,11 @@ public class LegacyReplicationManager {
           LOG.debug("Container {} appears empty and is closed, but cannot be " +
               "deleted because it has no replicas. Marking as EMPTY.",
               container);
-          report.incrementAndSample(HealthState.EMPTY, container.containerID());
+          if (count == null) {
+            report.incrementAndSample(HealthState.EMPTY, container.containerID());
+          } else {
+            report.incrementAndSampleInstant(HealthState.EMPTY, container.containerID(), count);
+          }
           return;
         }
 
@@ -524,19 +542,33 @@ public class LegacyReplicationManager {
         boolean placementSatisfied = placementStatus.isPolicySatisfied();
         ContainerID containerID = container.containerID();
         if (!placementStatus.isPolicySatisfied()) {
-          report.incrementAndSample(HealthState.MIS_REPLICATED, containerID);
+          if (count == null) {
+            report.incrementAndSample(HealthState.MIS_REPLICATED, containerID);
+          } else {
+            report.incrementAndSampleInstant(HealthState.MIS_REPLICATED, containerID, count);
+          }
         }
         if (!replicaSet.isHealthy()) {
-          report.incrementAndSample(HealthState.UNHEALTHY, containerID);
+          if (count == null) {
+            report.incrementAndSample(HealthState.UNHEALTHY, containerID);
+          } else {
+            report.incrementAndSampleInstant(HealthState.UNHEALTHY, containerID, count);
+          }
         }
         if (!sufficientlyReplicated || !placementSatisfied) {
           // Replicate container if needed.
           if (!inflightReplication.isFull() || !inflightDeletion.isFull()) {
             if (replicaSet.isUnrecoverable()) {
               // There are no healthy or unhealthy replicas.
-              report.incrementAndSample(HealthState.MISSING, containerID);
-              report.incrementAndSample(HealthState.UNDER_REPLICATED,
-                  containerID);
+              if (count == null) {
+                report.incrementAndSample(HealthState.MISSING, containerID);
+                report.incrementAndSample(HealthState.UNDER_REPLICATED,
+                        containerID);
+              } else {
+                report.incrementAndSampleInstant(HealthState.MISSING, containerID, count);
+                report.incrementAndSampleInstant(HealthState.UNDER_REPLICATED,
+                        containerID, count);
+              }
             } else {
               if (replicaSet.getHealthyReplicaCount() == 0 &&
                   replicaSet.getUnhealthyReplicaCount() != 0) {
@@ -568,8 +600,12 @@ public class LegacyReplicationManager {
               }
             });
         if (!vulnerableUnhealthy.isEmpty()) {
-          report.incrementAndSample(HealthState.UNDER_REPLICATED,
-              container.containerID());
+          if (count == null) {
+            report.incrementAndSample(HealthState.UNDER_REPLICATED,
+                    container.containerID());
+          } else {
+            report.incrementAndSampleInstant(HealthState.UNDER_REPLICATED, container.containerID(), count);
+          }
           handleVulnerableUnhealthyReplicas(replicaSet, vulnerableUnhealthy);
           return;
         }

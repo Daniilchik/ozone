@@ -51,6 +51,7 @@ import org.apache.hadoop.hdds.utils.HddsServerUtil;
 import org.apache.hadoop.ozone.ClientVersion;
 import org.apache.hadoop.ozone.OzoneSecurityUtil;
 import org.apache.hadoop.ozone.upgrade.UpgradeFinalizer.StatusAndMessages;
+import org.eclipse.jetty.util.IO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -464,6 +465,11 @@ public class ContainerOperationClient implements ScmClient {
   public ReplicationManagerReport getReplicationManagerReport()
       throws IOException {
     return storageContainerLocationClient.getReplicationManagerReport();
+  }
+
+  @Override
+  public ReplicationManagerReport getInstantReplicationManagerReport(int count) throws IOException {
+    return storageContainerLocationClient.getInstantReplicationManagerReport(count);
   }
 
   @Override

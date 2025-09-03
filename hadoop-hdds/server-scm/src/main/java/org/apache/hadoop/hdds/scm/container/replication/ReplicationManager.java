@@ -383,7 +383,7 @@ public class ReplicationManager implements SCMService, ContainerReplicaPendingOp
       }
       report.increment(c.getState());
       if (rmConf.isLegacyEnabled() && !isEC(c.getReplicationConfig())) {
-        legacyReplicationManager.processContainer(c, report);
+        legacyReplicationManager.processContainer(c, report, null);
         continue;
       }
       try {
@@ -399,6 +399,31 @@ public class ReplicationManager implements SCMService, ContainerReplicaPendingOp
     LOG.info("Replication Monitor Thread took {} milliseconds for" +
             " processing {} containers.", clock.millis() - start,
         containers.size());
+  }
+
+  public synchronized ReplicationManagerReport instantProcessContainers(int count) {
+    final List<ContainerInfo> containers =
+            containerManager.getContainers();
+    ReplicationManagerReport report = new ReplicationManagerReport();
+    ReplicationQueue newRepQueue = new ReplicationQueue();
+    for (ContainerInfo c : containers) {
+      if (!shouldRun()) {
+        break;
+      }
+      report.increment(c.getState());
+      if (rmConf.isLegacyEnabled() && !isEC(c.getReplicationConfig())) {
+        legacyReplicationManager.processContainer(c, report, count);
+        continue;
+      }
+      try {
+        processContainer(c, newRepQueue, report);
+        // TODO - send any commands contained in the health result
+      } catch (ContainerNotFoundException e) {
+        LOG.error("Container {} not found", c.getContainerID(), e);
+      }
+    }
+    report.setComplete();
+    return report;
   }
 
   public void sendCloseContainerEvent(ContainerID containerID) {

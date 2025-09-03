@@ -49,22 +49,36 @@ public class ReportSubcommand extends ScmSubcommand {
       description = "Format output as JSON")
   private boolean json;
 
+  @CommandLine.Option(names = { "--count" },
+          defaultValue = "100",
+          description = "Q")
+  private int count;
+
   @Override
   public void execute(ScmClient scmClient) throws IOException {
-    ReplicationManagerReport report = scmClient.getReplicationManagerReport();
-
+    ReplicationManagerReport report;
+    if (count > 100) {
+      report = scmClient.getInstantReplicationManagerReport(count);
+      outputHeader(report.getReportTimeStamp());
+      blankLine();
+      outputContainerStats(report);
+      blankLine();
+      outputContainerHealthStats(report);
+      blankLine();
+      outputContainerSamples(report);
+    } else {
+      report = scmClient.getReplicationManagerReport();
+      outputHeader(report.getReportTimeStamp());
+      blankLine();
+      outputContainerStats(report);
+      blankLine();
+      outputContainerHealthStats(report);
+      blankLine();
+      outputContainerSamples(report);
+    }
     if (json) {
       output(JsonUtils.toJsonStringWithDefaultPrettyPrinter(report));
-      return;
     }
-
-    outputHeader(report.getReportTimeStamp());
-    blankLine();
-    outputContainerStats(report);
-    blankLine();
-    outputContainerHealthStats(report);
-    blankLine();
-    outputContainerSamples(report);
   }
 
   private void outputHeader(long epochMs) {

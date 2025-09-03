@@ -81,6 +81,7 @@ message ScmContainerLocationRequest {
   optional TransferLeadershipRequestProto  transferScmLeadershipRequest = 42;
   optional GetFailedDeletedBlocksTxnRequestProto getFailedDeletedBlocksTxnRequest = 43;
   optional DecommissionScmRequestProto decommissionScmRequest = 44;
+  optional InstantReplicationManagerReportRequestProto instantReplicationManagerReportRequest = 45;
 }
 
 message ScmContainerLocationResponse {
@@ -133,6 +134,7 @@ message ScmContainerLocationResponse {
   optional TransferLeadershipResponseProto  transferScmLeadershipResponse = 42;
   optional GetFailedDeletedBlocksTxnResponseProto getFailedDeletedBlocksTxnResponse = 43;
   optional DecommissionScmResponseProto decommissionScmResponse = 44;
+  optional InstantReplicationManagerReportResponseProto getInstantReplicationManagerReportResponse = 45;
 
   enum Status {
     OK = 1;
@@ -184,6 +186,7 @@ enum Type {
   TransferLeadership = 38;
   GetFailedDeletedBlocksTransaction = 39;
   DecommissionScm = 40;
+  GetInstantReplicationManagerReport = 41;
 }
 
 /**
@@ -495,7 +498,16 @@ message ReplicationManagerReportRequestProto {
   optional string traceID = 1;
 }
 
+message InstantReplicationManagerReportRequestProto {
+  optional string traceID = 1;
+  optional int32 count = 2;
+}
+
 message ReplicationManagerReportResponseProto {
+  required ReplicationManagerReportProto report = 1;
+}
+
+message InstantReplicationManagerReportResponseProto {
   required ReplicationManagerReportProto report = 1;
 }
 

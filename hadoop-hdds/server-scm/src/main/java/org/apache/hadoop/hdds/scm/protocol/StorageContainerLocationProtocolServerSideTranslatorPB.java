@@ -563,6 +563,13 @@ public final class StorageContainerLocationProtocolServerSideTranslatorPB
             .setGetReplicationManagerReportResponse(getReplicationManagerReport(
                 request.getReplicationManagerReportRequest()))
             .build();
+      case GetInstantReplicationManagerReport:
+        return ScmContainerLocationResponse.newBuilder()
+            .setCmdType(request.getCmdType())
+            .setStatus(Status.OK)
+            .setGetInstantReplicationManagerReportResponse(getInstantReplicationManagerReport(
+                request.getInstantReplicationManagerReportRequest()))
+            .build();
       case StartContainerBalancer:
         return ScmContainerLocationResponse.newBuilder()
             .setCmdType(request.getCmdType())
@@ -1057,6 +1064,13 @@ public final class StorageContainerLocationProtocolServerSideTranslatorPB
     return ReplicationManagerReportResponseProto.newBuilder()
         .setReport(impl.getReplicationManagerReport().toProtobuf())
         .build();
+  }
+
+  public StorageContainerLocationProtocolProtos.InstantReplicationManagerReportResponseProto getInstantReplicationManagerReport(
+          StorageContainerLocationProtocolProtos.InstantReplicationManagerReportRequestProto request) throws IOException {
+    return StorageContainerLocationProtocolProtos.InstantReplicationManagerReportResponseProto.newBuilder()
+            .setReport(impl.getInstantReplicationManagerReport(request.getCount()).toProtobuf())
+            .build();
   }
 
   public StartContainerBalancerResponseProto startContainerBalancer(

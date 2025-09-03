@@ -858,6 +858,20 @@ public final class StorageContainerLocationProtocolClientSideTranslatorPB
   }
 
   @Override
+  public ReplicationManagerReport getInstantReplicationManagerReport(int count) throws IOException {
+    StorageContainerLocationProtocolProtos.InstantReplicationManagerReportRequestProto request =
+            StorageContainerLocationProtocolProtos.InstantReplicationManagerReportRequestProto.newBuilder()
+                    .setTraceID(TracingUtil.exportCurrentSpan())
+                    .setCount(count)
+                    .build();
+    ReplicationManagerReportResponseProto response =
+            submitRequest(Type.GetReplicationManagerReport,
+                    builder -> builder.setInstantReplicationManagerReportRequest(request))
+                    .getGetReplicationManagerReportResponse();
+    return ReplicationManagerReport.fromProtobuf(response.getReport());
+  }
+
+  @Override
   public StartContainerBalancerResponseProto startContainerBalancer(
       Optional<Double> threshold, Optional<Integer> iterations,
       Optional<Integer> maxDatanodesPercentageToInvolvePerIteration,

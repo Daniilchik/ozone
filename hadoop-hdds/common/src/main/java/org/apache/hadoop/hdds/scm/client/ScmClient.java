@@ -334,6 +334,8 @@ public interface ScmClient extends Closeable {
    */
   ReplicationManagerReport getReplicationManagerReport() throws IOException;
 
+  ReplicationManagerReport getInstantReplicationManagerReport(int count) throws IOException;
+
   /**
    * Start ContainerBalancer.
    */
