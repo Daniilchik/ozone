@@ -402,14 +402,10 @@ public class ReplicationManager implements SCMService, ContainerReplicaPendingOp
   }
 
   public synchronized ReplicationManagerReport instantProcessContainers(int count) {
-    final List<ContainerInfo> containers =
-            containerManager.getContainers();
+    final List<ContainerInfo> containers = containerManager.getContainers();
     ReplicationManagerReport report = new ReplicationManagerReport();
     ReplicationQueue newRepQueue = new ReplicationQueue();
     for (ContainerInfo c : containers) {
-      if (!shouldRun()) {
-        break;
-      }
       report.increment(c.getState());
       if (rmConf.isLegacyEnabled() && !isEC(c.getReplicationConfig())) {
         legacyReplicationManager.processContainer(c, report, count);

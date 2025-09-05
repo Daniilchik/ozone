@@ -864,10 +864,10 @@ public final class StorageContainerLocationProtocolClientSideTranslatorPB
                     .setTraceID(TracingUtil.exportCurrentSpan())
                     .setCount(count)
                     .build();
-    ReplicationManagerReportResponseProto response =
-            submitRequest(Type.GetReplicationManagerReport,
+    StorageContainerLocationProtocolProtos.InstantReplicationManagerReportResponseProto response =
+            submitRequest(Type.GetInstantReplicationManagerReport,
                     builder -> builder.setInstantReplicationManagerReportRequest(request))
-                    .getGetReplicationManagerReportResponse();
+                    .getGetInstantReplicationManagerReportResponse();
     return ReplicationManagerReport.fromProtobuf(response.getReport());
   }
 

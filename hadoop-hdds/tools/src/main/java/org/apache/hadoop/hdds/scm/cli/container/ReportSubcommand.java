@@ -113,8 +113,12 @@ public class ReportSubcommand extends ScmSubcommand {
         : ReplicationManagerReport.HealthState.values()) {
       List<ContainerID> containers = report.getSample(state);
       if (containers.size() > 0) {
+        if (count > 100) {
+          output("First " + count + " " + state + " containers:");
+        } else {
         output("First " + ReplicationManagerReport.SAMPLE_LIMIT + " " +
             state + " containers:");
+        }
         output(containers
             .stream()
             .map(ContainerID::toString)

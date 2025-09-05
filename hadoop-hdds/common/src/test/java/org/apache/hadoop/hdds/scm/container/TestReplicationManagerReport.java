@@ -122,6 +122,31 @@ public class TestReplicationManagerReport {
   }
 
   @Test
+  public void testInstantReportCanHoldMoreThanSampleLimit() {
+    int requested = ReplicationManagerReport.SAMPLE_LIMIT * 2;
+    for (int i = 0; i < requested; i++) {
+      report.incrementAndSampleInstant(
+              ReplicationManagerReport.HealthState.UNDER_REPLICATED,
+              new ContainerID(i), requested);
+    }
+
+    assertEquals(ReplicationManagerReport.SAMPLE_LIMIT,
+            report.getSample(ReplicationManagerReport.HealthState.UNDER_REPLICATED).size());
+
+    List<ContainerID> full = new ArrayList<>();
+    for (int i = 0; i < requested; i++) {
+      full.add(ContainerID.valueOf(i));
+    }
+    report.setSample(
+            ReplicationManagerReport.HealthState.UNDER_REPLICATED.toString(),
+            full);
+
+    assertEquals(requested,
+            report.getSample(ReplicationManagerReport.HealthState.UNDER_REPLICATED).size(),
+            "Instant-репорт должен возвращать все " + requested + " контейнеров");
+  }
+
+  @Test
   public void testContainerIDsCanBeSampled() {
     report.incrementAndSample(
         ReplicationManagerReport.HealthState.UNDER_REPLICATED,
@@ -159,13 +184,28 @@ public class TestReplicationManagerReport {
   @Test
   public void testSamplesAreLimited() {
     for (int i = 0; i < ReplicationManagerReport.SAMPLE_LIMIT * 2; i++) {
-      report.incrementAndSample(
+      report.incrementAndSampleInstant(
           ReplicationManagerReport.HealthState.UNDER_REPLICATED,
-          new ContainerID(i));
+          new ContainerID(i), 150);
     }
     List<ContainerID> sample =
         report.getSample(ReplicationManagerReport.HealthState.UNDER_REPLICATED);
     assertEquals(ReplicationManagerReport.SAMPLE_LIMIT, sample.size());
+    for (int i = 0; i < ReplicationManagerReport.SAMPLE_LIMIT; i++) {
+      assertEquals(new ContainerID(i), sample.get(i));
+    }
+  }
+
+  @Test
+  public void testInstantSamplesAreLimitedByCount() {
+    for (int i = 0; i < ReplicationManagerReport.SAMPLE_LIMIT * 3; i++) {
+      report.incrementAndSampleInstant(
+              ReplicationManagerReport.HealthState.UNDER_REPLICATED,
+              new ContainerID(i), ReplicationManagerReport.SAMPLE_LIMIT * 2);
+    }
+    List<ContainerID> sample =
+            report.getSample(ReplicationManagerReport.HealthState.UNDER_REPLICATED);
+    assertEquals(ReplicationManagerReport.SAMPLE_LIMIT * 2, sample.size());
     for (int i = 0; i < ReplicationManagerReport.SAMPLE_LIMIT; i++) {
       assertEquals(new ContainerID(i), sample.get(i));
     }
