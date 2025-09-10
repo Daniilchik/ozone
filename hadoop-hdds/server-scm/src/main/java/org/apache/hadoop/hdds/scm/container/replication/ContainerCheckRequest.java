@@ -37,6 +37,7 @@ public final class ContainerCheckRequest {
   private final ReplicationManagerReport report;
   private final ReplicationQueue replicationQueue;
   private final boolean readOnly;
+  private final Integer count;
 
   private ContainerCheckRequest(Builder builder) {
     this.containerInfo = builder.containerInfo;
@@ -47,6 +48,7 @@ public final class ContainerCheckRequest {
     this.report = builder.report;
     this.replicationQueue = builder.replicationQueue;
     this.readOnly = builder.readOnly;
+    this.count = builder.count;
   }
 
   public List<ContainerReplicaOp> getPendingOps() {
@@ -77,6 +79,10 @@ public final class ContainerCheckRequest {
     return readOnly;
   }
 
+  public Integer getCount() {
+    return count;
+  }
+
   /**
    * Builder class for ContainerCheckRequest.
    */
@@ -89,6 +95,7 @@ public final class ContainerCheckRequest {
     private ReplicationManagerReport report;
     private ReplicationQueue replicationQueue;
     private boolean readOnly = false;
+    private Integer count;
 
     public Builder setContainerInfo(ContainerInfo containerInfo) {
       this.containerInfo = containerInfo;
@@ -123,6 +130,11 @@ public final class ContainerCheckRequest {
 
     public Builder setReadOnly(boolean readOnly) {
       this.readOnly = readOnly;
+      return this;
+    }
+
+    public Builder setCount(Integer count) {
+      this.count = count;
       return this;
     }
 

@@ -69,8 +69,16 @@ public class ECMisReplicationCheckHandler extends AbstractCheck {
     ContainerHealthResult health = checkMisReplication(request);
     if (health.getHealthState() ==
         ContainerHealthResult.HealthState.MIS_REPLICATED) {
-      report.incrementAndSample(
-          ReplicationManagerReport.HealthState.MIS_REPLICATED, containerID);
+      if (request.getCount() == null) {
+        request.getReport().incrementAndSample(
+                ReplicationManagerReport.HealthState.MIS_REPLICATED,
+                container.containerID());
+      } else {
+        request.getReport().incrementAndSampleInstant(
+                ReplicationManagerReport.HealthState.MIS_REPLICATED,
+                container.containerID(), request.getCount()
+        );
+      }
       ContainerHealthResult.MisReplicatedHealthResult misRepHealth
           = ((ContainerHealthResult.MisReplicatedHealthResult) health);
       if (!misRepHealth.isReplicatedOkAfterPending()) {

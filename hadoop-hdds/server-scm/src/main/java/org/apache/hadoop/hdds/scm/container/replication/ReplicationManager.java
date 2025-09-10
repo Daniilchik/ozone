@@ -76,6 +76,7 @@ import org.apache.ratis.protocol.exceptions.NotLeaderException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
@@ -412,7 +413,7 @@ public class ReplicationManager implements SCMService, ContainerReplicaPendingOp
         continue;
       }
       try {
-        processContainer(c, newRepQueue, report);
+        processContainer(c, newRepQueue, report, false, count);
         // TODO - send any commands contained in the health result
       } catch (ContainerNotFoundException e) {
         LOG.error("Container {} not found", c.getContainerID(), e);
@@ -865,12 +866,12 @@ public class ReplicationManager implements SCMService, ContainerReplicaPendingOp
   protected void processContainer(ContainerInfo containerInfo,
       ReplicationQueue repQueue, ReplicationManagerReport report)
       throws ContainerNotFoundException {
-    processContainer(containerInfo, repQueue, report, false);
+    processContainer(containerInfo, repQueue, report, false, null);
   }
 
   protected boolean processContainer(ContainerInfo containerInfo,
       ReplicationQueue repQueue, ReplicationManagerReport report,
-      boolean readOnly) throws ContainerNotFoundException {
+      boolean readOnly, @Nullable Integer count) throws ContainerNotFoundException {
     synchronized (containerInfo) {
       ContainerID containerID = containerInfo.containerID();
       final boolean isEC = isEC(containerInfo.getReplicationConfig());
@@ -888,6 +889,7 @@ public class ReplicationManager implements SCMService, ContainerReplicaPendingOp
           .setPendingOps(pendingOps)
           .setReplicationQueue(repQueue)
           .setReadOnly(readOnly)
+          .setCount(count)
           .build();
       // This will call the chain of container health handlers in turn which
       // will issue commands as needed, update the report and perhaps add
@@ -1018,7 +1020,7 @@ public class ReplicationManager implements SCMService, ContainerReplicaPendingOp
   public boolean checkContainerStatus(ContainerInfo containerInfo,
       ReplicationManagerReport report) throws ContainerNotFoundException {
     report.increment(containerInfo.getState());
-    return processContainer(containerInfo, nullReplicationQueue, report, true);
+    return processContainer(containerInfo, nullReplicationQueue, report, true, null);
   }
 
   /**
