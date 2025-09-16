@@ -111,7 +111,7 @@ public class ClosedWithUnhealthyReplicasHandler extends AbstractCheck {
     // some unhealthy replicas were found so the container must be
     // over replicated due to unhealthy replicas.
     if (foundUnhealthy) {
-      if (request.getCount() == null) {
+      if (!request.isInstant()) {
         request.getReport().incrementAndSample(
                 ReplicationManagerReport.HealthState.OVER_REPLICATED,
                 containerInfo.containerID());

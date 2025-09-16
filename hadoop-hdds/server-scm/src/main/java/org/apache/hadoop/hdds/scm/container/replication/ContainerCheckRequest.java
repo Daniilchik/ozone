@@ -38,6 +38,7 @@ public final class ContainerCheckRequest {
   private final ReplicationQueue replicationQueue;
   private final boolean readOnly;
   private final Integer count;
+  private final boolean instant;
 
   private ContainerCheckRequest(Builder builder) {
     this.containerInfo = builder.containerInfo;
@@ -49,6 +50,7 @@ public final class ContainerCheckRequest {
     this.replicationQueue = builder.replicationQueue;
     this.readOnly = builder.readOnly;
     this.count = builder.count;
+    this.instant = builder.instant;
   }
 
   public List<ContainerReplicaOp> getPendingOps() {
@@ -83,6 +85,10 @@ public final class ContainerCheckRequest {
     return count;
   }
 
+  public boolean isInstant() {
+    return instant;
+  }
+
   /**
    * Builder class for ContainerCheckRequest.
    */
@@ -96,6 +102,7 @@ public final class ContainerCheckRequest {
     private ReplicationQueue replicationQueue;
     private boolean readOnly = false;
     private Integer count;
+    private boolean instant;
 
     public Builder setContainerInfo(ContainerInfo containerInfo) {
       this.containerInfo = containerInfo;
@@ -135,6 +142,7 @@ public final class ContainerCheckRequest {
 
     public Builder setCount(Integer count) {
       this.count = count;
+      this.instant = (count != null && count > 100);;
       return this;
     }
 

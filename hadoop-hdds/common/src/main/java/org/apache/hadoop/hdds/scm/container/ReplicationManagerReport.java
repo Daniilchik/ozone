@@ -99,6 +99,8 @@ public class ReplicationManagerReport {
   private final Map<String, LongAdder> stats;
   private final Map<String, List<ContainerID>> containerSample
       = new ConcurrentHashMap<>();
+//  private final Map<String, List<ContainerID>> instantContainerSample
+//          = new ConcurrentHashMap<>();
 
   public static ReplicationManagerReport fromProtobuf(
       HddsProtos.ReplicationManagerReportProto proto) {

@@ -112,7 +112,7 @@ public class RatisReplicationCheckHandler extends AbstractCheck {
           underHealth.isUnrecoverable(), underHealth.hasHealthyReplicas());
 
       if (underHealth.isUnrecoverable()) {
-        if (request.getCount() == null) {
+        if (!request.isInstant()) {
           report.incrementAndSample(ReplicationManagerReport.HealthState.MISSING,
                   container.containerID());
         } else {
@@ -121,7 +121,7 @@ public class RatisReplicationCheckHandler extends AbstractCheck {
         }
         return true;
       }
-      if (request.getCount() == null) {
+      if (!request.isInstant()) {
         report.incrementAndSample(
                 ReplicationManagerReport.HealthState.UNDER_REPLICATED,
                 container.containerID());
@@ -147,7 +147,7 @@ public class RatisReplicationCheckHandler extends AbstractCheck {
     */
     if (health.getHealthState()
         == ContainerHealthResult.HealthState.OVER_REPLICATED) {
-      if (request.getCount() == null) {
+      if (!request.isInstant()) {
         report.incrementAndSample(
                 ReplicationManagerReport.HealthState.OVER_REPLICATED,
                 container.containerID());
@@ -183,7 +183,7 @@ public class RatisReplicationCheckHandler extends AbstractCheck {
 
     if (health.getHealthState() ==
         ContainerHealthResult.HealthState.MIS_REPLICATED) {
-      if (request.getCount() == null) {
+      if (!request.isInstant()) {
         report.incrementAndSample(
                 ReplicationManagerReport.HealthState.MIS_REPLICATED,
                 container.containerID());

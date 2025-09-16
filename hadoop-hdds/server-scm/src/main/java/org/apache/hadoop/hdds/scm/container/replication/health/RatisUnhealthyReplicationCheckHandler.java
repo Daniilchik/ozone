@@ -65,7 +65,7 @@ public class RatisUnhealthyReplicationCheckHandler extends AbstractCheck {
     } else {
       LOG.info("Container {} has unhealthy replicas [{}]. Checking its " +
           "replication status.", container, replicaCount.getReplicas());
-      if (request.getCount() == null) {
+      if (!request.isInstant()) {
         report.incrementAndSample(ReplicationManagerReport.HealthState.UNHEALTHY,
                 container.containerID());
       } else {
@@ -82,7 +82,7 @@ public class RatisUnhealthyReplicationCheckHandler extends AbstractCheck {
         == ContainerHealthResult.HealthState.UNDER_REPLICATED) {
       ContainerHealthResult.UnderReplicatedHealthResult underHealth
           = ((ContainerHealthResult.UnderReplicatedHealthResult) health);
-      if (request.getCount() == null) {
+      if (!request.isInstant()) {
         report.incrementAndSample(
                 ReplicationManagerReport.HealthState.UNDER_REPLICATED,
                 container.containerID());
@@ -105,7 +105,7 @@ public class RatisUnhealthyReplicationCheckHandler extends AbstractCheck {
 
     if (health.getHealthState()
         == ContainerHealthResult.HealthState.OVER_REPLICATED) {
-      if (request.getCount() == null) {
+      if (!request.isInstant()) {
         report.incrementAndSample(
                 ReplicationManagerReport.HealthState.OVER_REPLICATED,
                 container.containerID());

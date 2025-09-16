@@ -54,6 +54,11 @@ public class ReportSubcommand extends ScmSubcommand {
           description = "Q")
   private int count;
 
+  @CommandLine.Option(names = { "--state" },
+          description = "Filter output by container health state (e.g. MISSING, UNDER_REPLICATED)"
+  )
+  private String stateFilter;
+
   @Override
   public void execute(ScmClient scmClient) throws IOException {
     ReplicationManagerReport report;
@@ -111,6 +116,9 @@ public class ReportSubcommand extends ScmSubcommand {
   private void outputContainerSamples(ReplicationManagerReport report) {
     for (ReplicationManagerReport.HealthState state
         : ReplicationManagerReport.HealthState.values()) {
+      if (stateFilter != null && !state.toString().equalsIgnoreCase(stateFilter.toString())) {
+        continue;
+      }
       List<ContainerID> containers = report.getSample(state);
       if (containers.size() > 0) {
         if (count > 100) {

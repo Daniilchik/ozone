@@ -78,7 +78,7 @@ public class QuasiClosedContainerHandler extends AbstractCheck {
     } else {
       LOG.debug("Container {} cannot be force closed and is stuck in " +
               "QUASI_CLOSED", containerInfo);
-      if (request.getCount() == null) {
+      if (!request.isInstant()) {
         request.getReport().incrementAndSample(
                 ReplicationManagerReport.HealthState.QUASI_CLOSED_STUCK,
                 containerInfo.containerID());

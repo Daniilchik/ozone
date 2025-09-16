@@ -57,7 +57,7 @@ public class EmptyContainerHandler extends AbstractCheck {
     Set<ContainerReplica> replicas = request.getContainerReplicas();
 
     if (isContainerEmptyAndClosed(containerInfo, replicas)) {
-      if (request.getCount() == null) {
+      if (!request.isInstant()) {
         request.getReport().incrementAndSample(
                 ReplicationManagerReport.HealthState.EMPTY,
                 containerInfo.containerID());
@@ -80,7 +80,7 @@ public class EmptyContainerHandler extends AbstractCheck {
       return true;
     } else if (containerInfo.getState() == HddsProtos.LifeCycleState.CLOSED
         && containerInfo.getNumberOfKeys() == 0 && replicas.isEmpty()) {
-      if (request.getCount() == null) {
+      if (!request.isInstant()) {
         // If the container is empty and has no replicas, it is possible it was
         // a container which stuck in the closing state which never got any
         // replicas created on the datanodes. In this case, we don't have enough

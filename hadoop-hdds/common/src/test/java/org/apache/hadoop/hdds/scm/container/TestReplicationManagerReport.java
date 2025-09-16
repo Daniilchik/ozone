@@ -183,10 +183,10 @@ public class TestReplicationManagerReport {
 
   @Test
   public void testSamplesAreLimited() {
-    for (int i = 0; i < ReplicationManagerReport.SAMPLE_LIMIT * 2; i++) {
-      report.incrementAndSampleInstant(
+    for (int i = 0; i < ReplicationManagerReport.SAMPLE_LIMIT; i++) {
+      report.incrementAndSample(
           ReplicationManagerReport.HealthState.UNDER_REPLICATED,
-          new ContainerID(i), 150);
+          new ContainerID(i));
     }
     List<ContainerID> sample =
         report.getSample(ReplicationManagerReport.HealthState.UNDER_REPLICATED);
