@@ -1,0 +1,83 @@
+diff --git a/hadoop-hdds/common/src/main/resources/ozone-default.xml b/hadoop-hdds/common/src/main/resources/ozone-default.xml
+index fc0a8f3..a390d0e 100644
+--- a/hadoop-hdds/common/src/main/resources/ozone-default.xml
++++ b/hadoop-hdds/common/src/main/resources/ozone-default.xml
+@@ -589,6 +589,19 @@
+       the address of the OM.
+     </description>
+   </property>
++  <property>
++    <name>ozone.om.rpc-bind-host</name>
++    <value>0.0.0.0</value>
++    <tag>OM, MANAGEMENT</tag>
++    <description>
++      The actual address the OM RPC server will bind to. If this optional
++      address is set, it overrides only the hostname portion of
++      ozone.om.address for binding. The ozone.om.address is still used
++      as the advertised address for client discovery. This is useful in
++      environments like Kubernetes with Istio sidecar, where the server
++      needs to bind to 0.0.0.0 while advertising a specific hostname.
++    </description>
++  </property>
+   <property>
+     <name>ozone.om.handler.count.key</name>
+     <value>100</value>
+diff --git a/hadoop-ozone/common/src/main/java/org/apache/hadoop/ozone/om/OMConfigKeys.java b/hadoop-ozone/common/src/main/java/org/apache/hadoop/ozone/om/OMConfigKeys.java
+index 91a93b8..92543ea 100644
+--- a/hadoop-ozone/common/src/main/java/org/apache/hadoop/ozone/om/OMConfigKeys.java
++++ b/hadoop-ozone/common/src/main/java/org/apache/hadoop/ozone/om/OMConfigKeys.java
+@@ -81,6 +81,8 @@ private OMConfigKeys() {
+       "ozone.om.address";
+   public static final String OZONE_OM_BIND_HOST_DEFAULT =
+       "0.0.0.0";
++  public static final String OZONE_OM_RPC_BIND_HOST_KEY =
++      "ozone.om.rpc-bind-host";
+   public static final int OZONE_OM_PORT_DEFAULT = 9862;
+   public static final String OZONE_OM_GRPC_PORT_KEY =
+       "ozone.om.grpc.port";
+diff --git a/hadoop-ozone/dist/src/main/compose/ozone-ha/docker-config b/hadoop-ozone/dist/src/main/compose/ozone-ha/docker-config
+index bdd504d..8184c9a 100644
+--- a/hadoop-ozone/dist/src/main/compose/ozone-ha/docker-config
++++ b/hadoop-ozone/dist/src/main/compose/ozone-ha/docker-config
+@@ -26,6 +26,7 @@ OZONE-SITE.XML_ozone.om.nodes.omservice=om1,om2,om3
+ OZONE-SITE.XML_ozone.om.address.omservice.om1=om1
+ OZONE-SITE.XML_ozone.om.address.omservice.om2=om2
+ OZONE-SITE.XML_ozone.om.address.omservice.om3=om3
++OZONE-SITE.XML_ozone.om.rpc-bind-host=0.0.0.0
+ OZONE-SITE.XML_ozone.om.ratis.enable=true
+ 
+ OZONE-SITE.XML_ozone.scm.service.ids=scmservice
+diff --git a/hadoop-ozone/ozone-manager/src/main/java/org/apache/hadoop/ozone/om/OzoneManager.java b/hadoop-ozone/ozone-manager/src/main/java/org/apache/hadoop/ozone/om/OzoneManager.java
+index 2a32e4b..5770a3a 100644
+--- a/hadoop-ozone/ozone-manager/src/main/java/org/apache/hadoop/ozone/om/OzoneManager.java
++++ b/hadoop-ozone/ozone-manager/src/main/java/org/apache/hadoop/ozone/om/OzoneManager.java
+@@ -300,6 +300,7 @@
+ import static org.apache.hadoop.ozone.om.OMConfigKeys.OZONE_DEFAULT_BUCKET_LAYOUT_DEFAULT;
+ import static org.apache.hadoop.ozone.om.OMConfigKeys.OZONE_KEY_DELETING_LIMIT_PER_TASK;
+ import static org.apache.hadoop.ozone.om.OMConfigKeys.OZONE_OM_ADDRESS_KEY;
++import static org.apache.hadoop.ozone.om.OMConfigKeys.OZONE_OM_RPC_BIND_HOST_KEY;
+ import static org.apache.hadoop.ozone.om.OMConfigKeys.OZONE_OM_ENABLE_FILESYSTEM_PATHS;
+ import static org.apache.hadoop.ozone.om.OMConfigKeys.OZONE_OM_ENABLE_FILESYSTEM_PATHS_DEFAULT;
+ import static org.apache.hadoop.ozone.om.OMConfigKeys.OZONE_OM_HANDLER_COUNT_DEFAULT;
+@@ -1510,7 +1511,20 @@ private RPC.Server getRpcServer(OzoneConfiguration conf) throws IOException {
+         ReconfigureProtocolService.newReflectiveBlockingService(
+             reconfigureServerProtocol);
+ 
+-    return startRpcServer(configuration, omNodeRpcAddr, omService,
++    // Use ozone.om.rpc-bind-host for binding if configured,
++    // otherwise fall back to the host from omNodeRpcAddr.
++    // This allows separating the bind address (e.g. 0.0.0.0) from
++    // the advertised address used for client/service discovery.
++    String rpcBindHost = conf.get(OZONE_OM_RPC_BIND_HOST_KEY);
++    InetSocketAddress bindAddr;
++    if (rpcBindHost != null && !rpcBindHost.isEmpty()) {
++      bindAddr = new InetSocketAddress(rpcBindHost,
++          omNodeRpcAddr.getPort());
++    } else {
++      bindAddr = omNodeRpcAddr;
++    }
++
++    return startRpcServer(configuration, bindAddr, omService,
+         omInterService, omAdminService, reconfigureService, handlerCount);
+   }
+ 
